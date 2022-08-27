@@ -39,13 +39,13 @@ vec4 staticnoise(vec2 position){
 
 // Motion noise based dither roughly learned from: https://stackoverflow.com/questions/12964279/whats-the-origin-of-this-glsl-rand-one-liner
 vec4 motionnoise(vec2 position, vec4 brightness){ 
-	vec4 limit = vec4(0.0,0.0,0.0,0.0); // dither on or off
+	vec4 limit = vec4(0,0,0,0); // dither on or off
 	vec2 wavenum = vec2(12.9898,78.233); // screen position noise
 	vec4 colornum = vec4(34.5345,67.5355,11.42455,83.7547); // color value noise
 	
 	// Alternate oscillations
-	wavenum = wavenum + vec2(sin(float(timer)*vec2(34.9898,50.233)));
-	colornum = colornum + vec4(sin(float(timer)*vec4(44.9808,15.638,66.3456,10.3563)));
+	wavenum = wavenum + sin(float(timer)*vec2(34.9898,50.233));
+	colornum = colornum + sin(float(timer)*vec4(44.9808,15.638,66.3456,10.3563));
 	
 	// Get random number based on oscillating sine
     limit = fract((sin(dot(position,wavenum)+float(timer))+sin(brightness*colornum*float(timer)))*23758.5453);
@@ -156,8 +156,8 @@ vec4 dither8x8(vec2 position) {
 vec4 colround(vec2 position, vec4 color){ // Rounding function
 	vec4 c = color;
 	float colorbands = coloramt/atan(bandcurve); // normalize color level value by band curve adjustment
-	vec4 ditherlimit = vec4(0.0,0.0,0.0,0.0); // dither probability vector
-	bvec4 compare = bvec4(0.0,0.0,0 0,0 0); // boolean vector for comparison of dither limit vector
+	vec4 ditherlimit = vec4(0,0,0,0); // dither probability vector
+	bvec4 compare = bvec4(0,0,0,0); // boolean vector for comparison of dither limit vector
 	
 	// apply non-linear banding
 	c *= bandcurve; // adjust for non-linear scaling
@@ -230,7 +230,7 @@ vec4 colround(vec2 position, vec4 color){ // Rounding function
 // Main operations
 
 // Adapted to GZDoom by Molecicco
-void Main()
+void main()
 {
 	coloramt = colorlevels - 1.0; // grab color levels from GZDoom
 	bandcurve = bandingstyle; // grab banding curve from GZDoom
