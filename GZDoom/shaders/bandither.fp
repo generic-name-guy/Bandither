@@ -14,8 +14,8 @@
 // ---------------------------------------------------------------------
 // User defined values
 
-float coloramt = 7; // Color levels per channel (red,green,blue) plus 1 (black). The lower the number, the more more bands and less colors used. 
-float bandcurve = 5; // Amount to non-linearly skew banding. Higher numbers have smoother darks and band brights more, which is good for dark games.
+float coloramt = 7.0; // Color levels per channel (red,green,blue) plus 1 (black). The lower the number, the more more bands and less colors used. 
+float bandcurve = 5.0; // Amount to non-linearly skew banding. Higher numbers have smoother darks and band brights more, which is good for dark games.
 int dithertype1 = 1; // First dither: 0 for Bayer 2x2, 1 for Bayer 8x8, 2 for static noise, 3 for motion noise, 4 for scanline, 5 for checker, 6 for magic square, and 7 for grid dithering.
 int dithertype2 = 3; // Second dither: 0 for Bayer 2x2, 1 for Bayer 8x8, 2 for static noise, 3 for motion noise, 4 for scanline, 5 for checker, 6 for magic square, and 7 for grid dithering.
 float ditherblend = 0.2; // How much to blend first and second dithers from first (0) to second (1).
@@ -39,16 +39,16 @@ vec4 staticnoise(vec2 position){
 
 // Motion noise based dither roughly learned from: https://stackoverflow.com/questions/12964279/whats-the-origin-of-this-glsl-rand-one-liner
 vec4 motionnoise(vec2 position, vec4 brightness){ 
-	vec4 limit = vec4(0,0,0,0); // dither on or off
+	vec4 limit = vec4(0.0,0.0,0.0,0.0); // dither on or off
 	vec2 wavenum = vec2(12.9898,78.233); // screen position noise
 	vec4 colornum = vec4(34.5345,67.5355,11.42455,83.7547); // color value noise
 	
 	// Alternate oscillations
-	wavenum = wavenum + sin(timer*vec2(34.9898,50.233));
-	colornum = colornum + sin(timer*vec4(44.9808,15.638,66.3456,10.3563));
+	wavenum = wavenum + vec2(sin(float(timer)*vec2(34.9898,50.233)));
+	colornum = colornum + vec4(sin(float(timer)*vec4(44.9808,15.638,66.3456,10.3563)));
 	
 	// Get random number based on oscillating sine
-    limit = fract((sin(dot(position,wavenum)+timer)+sin(brightness*colornum*timer))*23758.5453);
+    limit = fract((sin(dot(position,wavenum)+float(timer))+sin(brightness*colornum*float(timer)))*23758.5453);
 	
 	return limit; // return limit
 }
@@ -156,8 +156,8 @@ vec4 dither8x8(vec2 position) {
 vec4 colround(vec2 position, vec4 color){ // Rounding function
 	vec4 c = color;
 	float colorbands = coloramt/atan(bandcurve); // normalize color level value by band curve adjustment
-	vec4 ditherlimit = vec4(0,0,0,0); // dither probability vector
-	bvec4 compare = bvec4(0,0,0,0); // boolean vector for comparison of dither limit vector
+	vec4 ditherlimit = vec4(0.0,0.0,0.0,0.0); // dither probability vector
+	bvec4 compare = bvec4(0.0,0.0,0 0,0 0); // boolean vector for comparison of dither limit vector
 	
 	// apply non-linear banding
 	c *= bandcurve; // adjust for non-linear scaling
@@ -188,7 +188,7 @@ vec4 colround(vec2 position, vec4 color){ // Rounding function
 		ditherlimit = grid2x2(position);
 	}
 	
-	ditherlimit = ditherlimit*(1-ditherblend); // adjust first dither
+	ditherlimit = ditherlimit*(1.0-ditherblend); // adjust first dither
 	
 	// determine second dither probability
 	if (dithertype2 == 0) { // Bayer 2x2 dither
@@ -210,7 +210,7 @@ vec4 colround(vec2 position, vec4 color){ // Rounding function
 	}
 	
 	// Adjust dither amount based on 0.5 for rounding
-	ditherlimit = ditheramt*ditherlimit + (1-ditheramt)*0.5; // 0.5 is for rounding up or down
+	ditherlimit = ditheramt*ditherlimit + (1.0-ditheramt)*0.5; // 0.5 is for rounding up or down
 	
 	// determine which color values to quantize up for dithering
 	compare = greaterThan(c-cfloor,ditherlimit);
@@ -230,9 +230,9 @@ vec4 colround(vec2 position, vec4 color){ // Rounding function
 // Main operations
 
 // Adapted to GZDoom by Molecicco
-void main()
+void Main()
 {
-	coloramt = colorlevels - 1; // grab color levels from GZDoom
+	coloramt = colorlevels - 1.0; // grab color levels from GZDoom
 	bandcurve = bandingstyle; // grab banding curve from GZDoom
 	dithertype1 = ditherstyle1; // grab first dither from GZDoom
 	dithertype2 = ditherstyle2; // grab second dither from GZDoom
@@ -242,5 +242,5 @@ void main()
 
 
 	vec4 frag = texture(InputTexture, TexCoord); // grab color value from screen coordinate
-	FragColor = colround(floor(gl_FragCoord.xy/ditherscale), frag); // band it and dither it
+	FragColor = colround(floor(gl_FragCoord.xy/float(ditherscale)), frag); // band it and dither it
 }
